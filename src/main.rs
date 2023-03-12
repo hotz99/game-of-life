@@ -3,8 +3,6 @@ mod generation;
 
 use std::error::Error;
 use std::io;
-use std::thread::sleep;
-use std::time::Duration;
 
 use crossterm::event::{EnableMouseCapture, DisableMouseCapture};
 use crossterm::execute;
@@ -27,8 +25,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     if let Err(err) = res {
         println!("{:?}", err)
     }
-
-    sleep(Duration::from_secs(5));
 
     // restore terminal
     disable_raw_mode()?;

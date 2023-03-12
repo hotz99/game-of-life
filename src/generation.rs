@@ -3,7 +3,7 @@ use tui::text::Spans;
 
 pub type Gen = Vec<Vec<Cell>>;
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Cell {
     Alive,
     Dead,

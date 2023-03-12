@@ -1,3 +1,4 @@
+use crossterm::event::{Event, KeyCode, self};
 use tui::{ backend::Backend, Terminal, text::{Spans, Span}, widgets::{Block, Borders, Paragraph}, style::{Style, Color, Modifier}, layout::Alignment};
 use std::{io::Result, thread::sleep, time::Duration};
 
@@ -30,13 +31,24 @@ fn render_spans<B: Backend>(terminal: &mut Terminal<B>, spans: &Vec<Spans>) -> R
     }
 }
 
-fn has_halted() -> bool {
-    true
+fn has_user_halted() -> bool {
+    if (crossterm::event::poll(Duration::from_millis(1))).unwrap() {
+        if let Event::Key(k) = event::read().unwrap() {
+            match k.code {
+                KeyCode::Char('q') => {
+                    return true
+                }, 
+                _ => {}
+            }
+        }
+    }
+
+    false
 }
 
 pub fn init<B: Backend>(terminal: &mut Terminal<B>) -> Result<()> {
-    let init_gen = &init_gen();
-    let init_spans = &gen_to_spans(&init_gen);
+    let mut curr_gen = init_gen();
+    let init_spans = &gen_to_spans(&curr_gen);
 
     let res = render_spans(terminal, init_spans);
 
@@ -45,15 +57,16 @@ pub fn init<B: Backend>(terminal: &mut Terminal<B>) -> Result<()> {
     }
 
     loop {
-        let next_gen = next_gen(&init_gen);
+        let next_gen = next_gen(&curr_gen);
         let spans = &gen_to_spans(&next_gen);
 
         render_spans(terminal, spans)?;
 
-        sleep(Duration::from_secs(1));
+        sleep(Duration::from_millis(32));
         
-        // TODO
-        // if has_halted() { break }
+        if has_user_halted() { break }
+
+        curr_gen = next_gen;
     }
 
     Ok(())
