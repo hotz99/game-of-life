@@ -101,3 +101,22 @@ pub fn gen_to_spans(gen: &Gen) -> Vec<Spans> {
 
     spans
 }
+
+pub fn gen_from_file(s: &String) -> Gen {
+    let mut gen = Gen::new();
+
+    for line in s.lines() {
+        let mut row = Vec::new();
+
+        for ch in line.chars() {
+            if ch == '.' {
+                row.push(Cell::Dead);
+            } else {
+                row.push(Cell::Alive);
+            }
+        }
+        gen.push(row);
+    }
+
+    gen
+}

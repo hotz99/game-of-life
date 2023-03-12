@@ -1,6 +1,7 @@
 use crossterm::event::{Event, KeyCode, self};
+use rand::Rng;
 use tui::{ backend::Backend, Terminal, text::{Spans, Span}, widgets::{Block, Borders, Paragraph}, style::{Style, Color, Modifier}, layout::Alignment};
-use std::{io::Result, thread::sleep, time::Duration};
+use std::{io::{Result, self}, thread::sleep, time::Duration, fs};
 
 use crate::generation::*;
 
@@ -46,8 +47,17 @@ fn has_user_halted() -> bool {
     false
 }
 
+fn rand_pattern() -> Result<String> {
+    let i = rand::thread_rng().gen_range(1..=513);
+
+    let file = format!("presets/pattern{}.txt", i);
+    fs::read_to_string(file)
+}
+
 pub fn init<B: Backend>(terminal: &mut Terminal<B>) -> Result<()> {
-    let mut curr_gen = init_gen();
+    let rand_gen = gen_from_file(&rand_pattern()?);
+
+    let mut curr_gen = rand_gen; //init_gen();
     let init_spans = &gen_to_spans(&curr_gen);
 
     let res = render_spans(terminal, init_spans);
