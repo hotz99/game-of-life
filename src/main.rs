@@ -3,14 +3,17 @@ mod generation;
 
 use std::error::Error;
 use std::io;
+use std::thread::sleep;
+use std::time::Duration;
 
-use crossterm::event::EnableMouseCapture;
+use crossterm::event::{EnableMouseCapture, DisableMouseCapture};
 use crossterm::execute;
-use crossterm::terminal::{enable_raw_mode, EnterAlternateScreen};
+use crossterm::terminal::{enable_raw_mode, EnterAlternateScreen, disable_raw_mode, LeaveAlternateScreen};
 use tui::backend::CrosstermBackend;
 use tui::Terminal;
 
 fn main() -> Result<(), Box<dyn Error>> {
+    // setup terminal
     enable_raw_mode()?;
     let mut stdout = io::stdout();
     execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
@@ -18,11 +21,23 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut terminal = Terminal::new(backend)?;
     terminal.show_cursor()?;
 
-    let res = app::init(&mut terminal.get_frame());
+    // initiate app
+    let res = app::init(&mut terminal);
 
     if let Err(err) = res {
         println!("{:?}", err)
     }
+
+    sleep(Duration::from_secs(5));
+
+    // restore terminal
+    disable_raw_mode()?;
+    execute!(
+        terminal.backend_mut(),
+        LeaveAlternateScreen,
+        DisableMouseCapture
+    )?;
+    terminal.show_cursor()?;
 
     Ok(())
 }
