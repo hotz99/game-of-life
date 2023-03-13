@@ -1,7 +1,7 @@
 use crossterm::event::{Event, KeyCode, self};
 use rand::Rng;
 use tui::{ backend::Backend, Terminal, text::{Spans, Span}, widgets::{Block, Borders, Paragraph}, style::{Style, Color, Modifier}, layout::Alignment};
-use std::{io::{Result, self}, thread::sleep, time::Duration, fs};
+use std::{io::{Result}, thread::sleep, time::Duration, fs};
 
 use crate::generation::*;
 
@@ -32,19 +32,24 @@ fn render_spans<B: Backend>(terminal: &mut Terminal<B>, spans: &Vec<Spans>) -> R
     }
 }
 
-fn has_user_halted() -> bool {
+enum Input {
+    Quit,
+    NewPattern,
+    None
+}
+
+fn read_input() -> Input {
     if (crossterm::event::poll(Duration::from_millis(1))).unwrap() {
         if let Event::Key(k) = event::read().unwrap() {
             match k.code {
-                KeyCode::Char('q') => {
-                    return true
-                }, 
-                _ => {}
-            }
+                KeyCode::Char('q') => return Input::Quit,
+                KeyCode::Char('n') => return Input::NewPattern,
+                _ => Input::None
+            };
         }
     }
 
-    false
+    Input::None
 }
 
 fn rand_pattern() -> Result<String> {
@@ -55,9 +60,7 @@ fn rand_pattern() -> Result<String> {
 }
 
 pub fn init<B: Backend>(terminal: &mut Terminal<B>) -> Result<()> {
-    let rand_gen = gen_from_file(&rand_pattern()?);
-
-    let mut curr_gen = rand_gen; //init_gen();
+    let mut curr_gen = gen_from_file(&rand_pattern()?);
     let init_spans = &gen_to_spans(&curr_gen);
 
     let res = render_spans(terminal, init_spans);
@@ -67,14 +70,20 @@ pub fn init<B: Backend>(terminal: &mut Terminal<B>) -> Result<()> {
     }
 
     loop {
-        let next_gen = next_gen(&curr_gen);
+        let mut next_gen = next_gen(&curr_gen);
         let spans = &gen_to_spans(&next_gen);
 
         render_spans(terminal, spans)?;
 
         sleep(Duration::from_millis(32));
         
-        if has_user_halted() { break }
+        match read_input() {
+            Input::Quit => break,
+            Input::NewPattern => {
+                next_gen = gen_from_file(&rand_pattern()?)
+            },
+            _ => {}
+        }
 
         curr_gen = next_gen;
     }

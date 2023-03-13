@@ -1,4 +1,3 @@
-use rand::{thread_rng, Rng};
 use tui::text::Spans;
 
 pub type Gen = Vec<Vec<Cell>>;
@@ -22,24 +21,6 @@ fn get_alive(row: usize, col: usize, gen: &Gen) -> usize {
     }
     
     count
-}
-
-pub fn init_gen() -> Gen {
-    let cells = vec![Cell::Dead, Cell::Dead, Cell::Alive, Cell::Dead, Cell::Alive];
-    let rows = 8;
-    let cols = 15;
-    let mut gen = Gen::new();
-
-    for _ in 0..rows {
-        let mut row: Vec<Cell> = Vec::new();
-        for _ in 0..cols {
-            let rand = thread_rng().gen_range(0..10);
-            row.push(cells[rand % 5]);
-        }
-        gen.push(row);
-    }
-
-    gen
 }
 
 pub fn next_gen(gen: &Gen) -> Gen {
