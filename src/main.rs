@@ -20,9 +20,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     terminal.show_cursor()?;
 
     // initiate app
-    let res = app::init(&mut terminal);
-
-    if let Err(err) = res {
+    if let Err(err) = app::init(&mut terminal) {
         println!("{:?}", err)
     }
 
