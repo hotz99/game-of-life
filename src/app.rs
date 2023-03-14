@@ -22,14 +22,11 @@ fn render_spans<B: Backend>(terminal: &mut Terminal<B>, spans: &Vec<Spans>) -> R
         .block(create_block("  Game of Life  "))
         .alignment(Alignment::Center);
 
-    let res = terminal.draw(|f| {
-        f.render_widget(paragraph, f.size())
-    });
+        terminal.draw(|f| {
+            f.render_widget(paragraph, f.size())
+        })?;
 
-    match res {
-        Err(e) => return Err(e),
-        Ok(_) => Ok(())
-    }
+        Ok(())
 }
 
 enum Input {
@@ -63,10 +60,9 @@ pub fn init<B: Backend>(terminal: &mut Terminal<B>) -> Result<()> {
     let mut curr_gen = gen_from_file(&rand_pattern()?);
     let init_spans = &gen_to_spans(&curr_gen);
 
-    let res = render_spans(terminal, init_spans);
-
-    if let Err(err) = res {
-        println!("{:?}", err)
+    match render_spans(terminal, init_spans) {
+        Err(e) => println!("{:?}", e),
+        Ok(_) => {}
     }
 
     loop {

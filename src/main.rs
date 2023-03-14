@@ -20,9 +20,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     terminal.show_cursor()?;
 
     // initiate app
-    if let Err(err) = app::init(&mut terminal) {
-        println!("{:?}", err)
-    }
+    match app::init(&mut terminal) {
+        Err(e) => println!("{:?}", e),
+        Ok(_) => {}
+    };
 
     // restore terminal
     disable_raw_mode()?;
