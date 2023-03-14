@@ -19,7 +19,7 @@ fn render_spans<B: Backend>(terminal: &mut Terminal<B>, spans: &Vec<Spans>) -> R
 
     let paragraph = Paragraph::new(spans.clone())
         .style(Style::default())
-        .block(create_block("  Jogo da Vida  "))
+        .block(create_block("  Game of Life  "))
         .alignment(Alignment::Center);
 
     let res = terminal.draw(|f| {
